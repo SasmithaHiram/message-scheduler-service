@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/src/main/resources/application.properties">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/src/main/resources/application.properties" />
+              <option name="originalContent" value="# SMS API configuration&#10;sms.api.url=https://app.text.lk/api/v3/sms/send&#10;# Provided token (keep this secret in production)&#10;sms.api.token=2614|D9XyINBtSATfNmcpZmPB6VcOJ80MA0BOs9h7u70d4d0d3119 &#10;sms.sender_id=TextLKDemo&#10;&#10;# Server port (optional)&#10;#server.port=8080&#10;&#10;" />
+              <option name="updatedContent" value="# SMS API configuration&#10;sms.api.url=https://app.text.lk/api/v3/sms/send&#10;# Provided token (keep this secret in production)&#10;sms.api.token=2614|D9XyINBtSATfNmcpZmPB6VcOJ80MA0BOs9h7u70d4d0d3119&#10;sms.sender_id=TextLKDemo&#10;# Auth header configuration - adjust if API expects a different format&#10;sms.auth.header=Authorization&#10;sms.auth.prefix=Bearer&#10;# Token location: header|query|body&#10;sms.api.token.location=header&#10;sms.api.token.key=token&#10;&#10;# Server port (optional)&#10;#server.port=8080" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
