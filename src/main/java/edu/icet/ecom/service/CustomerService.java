@@ -4,6 +4,7 @@ import edu.icet.ecom.model.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,7 +13,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +33,14 @@ public class CustomerService {
 
     List<Customer> getSampleCustomers() {
         List<Customer> customers = new ArrayList<>();
-        customers.add(new Customer("Sas", "94714839984"));
+        customers.add(new Customer("Gihan", "940753333435"));
+        customers.add(new Customer("Sasmitha", "940714839984"));
         return customers;
     }
 
-    @Scheduled(cron = "0 20 17 22 12 ?", zone = "Asia/Colombo")
+    @Scheduled(cron = "0 0 18 22 12 ?", zone = "Asia/Colombo")
     public void sendChristmasMessages() {
-        String message = "Merry Christmas";
+        String message = "Happy New Year - Sasmitha Scheduled Test Message";
         getSampleCustomers().forEach(customer -> {
             sendMessage(customer.getPhoneNumber(), message+customer.getName());
         });
@@ -49,18 +53,21 @@ public class CustomerService {
     void sendMessage(String phoneNumber, String message) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + smsApiToken);
-        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("recipient", phoneNumber);
-        body.add("sender_id", smsSenderId);
-        body.add("type", "plain");
-        body.add("message", message);
+//        LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        Map<String, String> body = new HashMap<>();
+        body.put("recipient", phoneNumber);
+        body.put("sender_id", smsSenderId);
+        body.put("type", "plain");
+        body.put("message", message);
 
-        org.springframework.http.HttpEntity<LinkedMultiValueMap<String, String>> request =
+//        org.springframework.http.HttpEntity<LinkedMultiValueMap<String, String>> request =
                 new org.springframework.http.HttpEntity<>(body, httpHeaders);
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, httpHeaders);
 
         restTemplate.postForEntity(smsApiUrl, request, Void.class);
+        log.info("Sent SMS to {}: {}", phoneNumber, message);
     }
 }
 
