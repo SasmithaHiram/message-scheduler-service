@@ -38,7 +38,6 @@ public class CustomerService {
         return customers;
     }
 
-    @Scheduled(cron = "0 0 18 22 12 ?", zone = "Asia/Colombo")
     public void sendChristmasMessages() {
         String message = "Happy New Year - Sasmitha Scheduled Test Message";
         getSampleCustomers().forEach(customer -> {
