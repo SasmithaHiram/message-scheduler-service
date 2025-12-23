@@ -9,7 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public class CustomerService {
     @Value("${sms.sender_id}")
     private String smsSenderId;
 
-    private List<Customer> getSampleCustomers() {
+    public List<Customer> getSampleCustomers() {
         List<Customer> customers = new ArrayList<>();
         customers.add(new Customer("Gihan", "940753333435"));
         customers.add(new Customer("Sasmitha", "940714839984"));
@@ -80,6 +79,3 @@ public class CustomerService {
         log.info("Sent SMS to {}: {}", phoneNumber, message);
     }
 }
-
-
-
