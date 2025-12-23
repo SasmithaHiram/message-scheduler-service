@@ -22,6 +22,12 @@ jobs:
       - name: Print Java version (debug)
         run: java -version || true
 
+      - name: Show CustomerService.java (debug)
+        run: |
+          echo "=== CustomerService.java content ==="
+          sed -n '1,240p' src/main/java/edu/icet/ecom/service/CustomerService.java || true
+          echo "=== end ==="
+
       - name: Build with Maven
         run: mvn -B -DskipTests package
 
