@@ -21,6 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomerService {
+    private String message;
 
     private final RestTemplate restTemplate;
 
@@ -35,18 +36,30 @@ public class CustomerService {
         List<Customer> customers = new ArrayList<>();
         customers.add(new Customer("Gihan", "940753333435"));
         customers.add(new Customer("Sasmitha", "940714839984"));
+        customers.add(new Customer("Udayanga", "940774409158"));
+        customers.add(new Customer("Vishmitha", "940753521146"));
+        customers.add(new Customer("Mallika", "940779998575"));
         return customers;
     }
 
+    @Scheduled(cron = "0 1 0 25 12 *", zone = "Asia/Colombo")
     public void sendChristmasMessages() {
-        String message = "Happy New Year - Sasmitha Scheduled Test Message";
         getSampleCustomers().forEach(customer -> {
-            sendMessage(customer.getPhoneNumber(), message+customer.getName());
+            message = "Merry Christmas" + customer.getName() + "!\n"
+                    + "Wishing you joy, peace, and happiness.\n"
+                    + "Warm regards,\n"
+                    + "Sasmitha";
+            sendMessage(customer.getPhoneNumber(), message);
         });
     }
 
-    @Scheduled(cron = "0 0 9 1 1 ?", zone = "Asia/Colombo")
+    @Scheduled(cron = "0 1 0 1 1 *", zone = "Asia/Colombo")
     public void sendNewYearMessages() {
+        getSampleCustomers().forEach(customer -> {
+            message = "Happy New Year, " + customer.getName() +
+                    "!\nBest wishes,\nSasmitha";
+            sendMessage(customer.getPhoneNumber(), message);
+        });
     }
 
     void sendMessage(String phoneNumber, String message) {
