@@ -54,14 +54,12 @@ public class CustomerService {
         httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + smsApiToken);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-//        LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         Map<String, String> body = new HashMap<>();
         body.put("recipient", phoneNumber);
         body.put("sender_id", smsSenderId);
         body.put("type", "plain");
         body.put("message", message);
 
-//        org.springframework.http.HttpEntity<LinkedMultiValueMap<String, String>> request =
                 new org.springframework.http.HttpEntity<>(body, httpHeaders);
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, httpHeaders);
 
