@@ -1,14 +1,15 @@
 package edu.icet.ecom.service;
 
 import edu.icet.ecom.model.Customer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -17,15 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class CustomerService {
     private String message;
 
     private final RestTemplate restTemplate;
-    private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
-
-    public CustomerService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     @Value("${sms.api.url}")
     private String smsApiUrl;
@@ -34,8 +32,7 @@ public class CustomerService {
     @Value("${sms.sender_id}")
     private String smsSenderId;
 
-    // make this public so controllers in other packages can access it
-    public List<Customer> getSampleCustomers() {
+    List<Customer> getSampleCustomers() {
         List<Customer> customers = new ArrayList<>();
         customers.add(new Customer("Gihan", "940753333435"));
         customers.add(new Customer("Sasmitha", "940714839984"));
@@ -83,3 +80,6 @@ public class CustomerService {
         log.info("Sent SMS to {}: {}", phoneNumber, message);
     }
 }
+
+
+
