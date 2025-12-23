@@ -34,7 +34,8 @@ public class CustomerService {
     @Value("${sms.sender_id}")
     private String smsSenderId;
 
-    List<Customer> getSampleCustomers() {
+    // make this public so controllers in other packages can access it
+    public List<Customer> getSampleCustomers() {
         List<Customer> customers = new ArrayList<>();
         customers.add(new Customer("Gihan", "940753333435"));
         customers.add(new Customer("Sasmitha", "940714839984"));
