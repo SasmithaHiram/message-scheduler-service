@@ -9,7 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -31,6 +31,15 @@ public class CustomerService {
     private String smsApiToken;
     @Value("${sms.sender_id}")
     private String smsSenderId;
+
+    @Value("${sms.auth.header:Authorization}")
+    private String smsAuthHeader;
+    @Value("${sms.auth.prefix:}")
+    private String smsAuthPrefix;
+    @Value("${sms.api.token.location:header}")
+    private String smsApiTokenLocation;
+    @Value("${sms.api.token.key:token}")
+    private String smsApiTokenKey;
 
     List<Customer> getSampleCustomers() {
         List<Customer> customers = new ArrayList<>();
@@ -64,21 +73,56 @@ public class CustomerService {
 
     void sendMessage(String phoneNumber, String message) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + smsApiToken);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
+        // Normalize phone number to a simple international format expected by the SMS API
+        String normalizedPhone = normalizePhoneNumber(phoneNumber);
+
         Map<String, String> body = new HashMap<>();
-        body.put("recipient", phoneNumber);
+        body.put("recipient", normalizedPhone);
         body.put("sender_id", smsSenderId);
         body.put("type", "plain");
         body.put("message", message);
 
-                new org.springframework.http.HttpEntity<>(body, httpHeaders);
+        String targetUrl = smsApiUrl;
+
+        // Place token according to configuration: header|query|body
+        if ("body".equalsIgnoreCase(smsApiTokenLocation)) {
+            body.put(smsApiTokenKey, smsApiToken);
+        } else if ("query".equalsIgnoreCase(smsApiTokenLocation)) {
+            // append token as query param
+            targetUrl = smsApiUrl + (smsApiUrl.contains("?") ? "&" : "?") + smsApiTokenKey + "=" + smsApiToken;
+        } else {
+            // default: header
+            String headerValue = (smsAuthPrefix != null && !smsAuthPrefix.isBlank()) ? (smsAuthPrefix + " " + smsApiToken) : smsApiToken;
+            httpHeaders.set(smsAuthHeader, headerValue);
+        }
+
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, httpHeaders);
 
-        restTemplate.postForEntity(smsApiUrl, request, Void.class);
-        log.info("Sent SMS to {}: {}", phoneNumber, message);
+        try {
+            restTemplate.postForEntity(targetUrl, request, Void.class);
+            log.info("Sent SMS to {}: {}", normalizedPhone, message);
+        } catch (HttpClientErrorException ex) {
+            // Log HTTP error response to help debug 401/403 issues
+            log.error("Failed to send SMS to {}: status={}, responseBody={}", normalizedPhone, ex.getStatusCode(), ex.getResponseBodyAsString());
+        } catch (Exception ex) {
+            log.error("Unexpected error when sending SMS to {}: {}", normalizedPhone, ex.getMessage(), ex);
+        }
     }
+
+    private String normalizePhoneNumber(String phone) {
+        if (phone == null) return phone;
+        phone = phone.trim();
+        // If starts with +, remove the plus
+        if (phone.startsWith("+")) {
+            return phone.substring(1);
+        }
+        // If starts with single 0 (local format), convert to Sri Lanka country code (94)
+        if (phone.startsWith("0") && phone.length() > 1) {
+            return "94" + phone.substring(1);
+        }
+        return phone;
+    }
+
 }
-
-

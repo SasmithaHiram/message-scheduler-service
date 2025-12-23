@@ -1,16 +1,25 @@
 package edu.icet.ecom.controller;
 
 import edu.icet.ecom.service.CustomerService;
-import lombok.RequiredArgsConstructor;
+import edu.icet.ecom.model.Customer;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@RequiredArgsConstructor
 @CrossOrigin
 public class CustomerController {
 
     private final CustomerService customerService;
 
-}
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
 
+    @GetMapping
+    public List<Customer> getAll() {
+        return customerService.getSampleCustomers();
+    }
+
+}
