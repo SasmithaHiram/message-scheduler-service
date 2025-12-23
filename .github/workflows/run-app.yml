@@ -11,6 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
 
       - name: Set up JDK 17 and cache Maven
         uses: actions/setup-java@v4
@@ -22,14 +25,29 @@ jobs:
       - name: Print Java version (debug)
         run: java -version || true
 
+      - name: Show git info (debug)
+        run: |
+          echo "=== git status ==="
+          git rev-parse --abbrev-ref HEAD || true
+          git rev-parse HEAD || true
+          git status --porcelain || true
+          echo "=== git log (last 5) ==="
+          git --no-pager log -n 5 --oneline || true
+
       - name: Show CustomerService.java (debug)
         run: |
           echo "=== CustomerService.java content ==="
           sed -n '1,240p' src/main/java/edu/icet/ecom/service/CustomerService.java || true
           echo "=== end ==="
 
-      - name: Build with Maven
-        run: mvn -B -DskipTests package
+      - name: Show CustomerController.java (debug)
+        run: |
+          echo "=== CustomerController.java content ==="
+          sed -n '1,240p' src/main/java/edu/icet/ecom/controller/CustomerController.java || true
+          echo "=== end ==="
+
+      - name: Build with Maven (with expanded errors)
+        run: mvn -B -DskipTests -e package
 
       - name: Start application (background)
         env:
