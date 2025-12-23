@@ -26,10 +26,13 @@ jobs:
         run: mvn -B -DskipTests package
 
       - name: Start application (background)
+        env:
+          SMS_API_TOKEN: ${{ secrets.SMS_API_TOKEN }}
+          SMS_SENDER_ID: ${{ secrets.SMS_SENDER_ID }}
         run: |
           echo "Starting Spring Boot app via Maven spring-boot:run (background)..."
-          # Use the Spring Boot Maven plugin to run the app so we don't rely on an executable jar
-          nohup mvn -q -DskipTests spring-boot:run > app.log 2>&1 &
+          # Pass SMS secrets as system properties so the app picks them up from application.properties placeholders
+          nohup mvn -q -DskipTests spring-boot:run -Dspring-boot.run.jvmArguments="-Dsms.api.token=${SMS_API_TOKEN} -Dsms.sender_id=${SMS_SENDER_ID}" > app.log 2>&1 &
           echo $! > app.pid
           # give the app more time to start and produce logs
           sleep 30
