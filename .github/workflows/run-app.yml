@@ -35,22 +35,33 @@ jobs:
           git --no-pager log -n 5 --oneline
 
       # 4️⃣ CI patch (safe)
-      - name: Make getSampleCustomers public (CI-only)
+      - name: CI patch: make getSampleCustomers public if needed
         run: |
           FILE=src/main/java/edu/icet/ecom/service/CustomerService.java
           if [ -f "$FILE" ]; then
-            # Only patch if not already public
-            if grep -q "List<Customer> getSampleCustomers()" "$FILE" && ! grep -q "public List<Customer> getSampleCustomers()" "$FILE"; then
-              sed -i "s/List<Customer> getSampleCustomers()/public List<Customer> getSampleCustomers()/g" "$FILE"
-              echo "Patched getSampleCustomers() to public"
+            echo "Normalizing duplicate 'public' occurrences if any"
+            # collapse any accidental duplicate 'public public' sequences
+            sed -i -E 's/public[[:space:]]+public/public/g' "$FILE" || true
+
+            if grep -qE '^[[:space:]]*public[[:space:]]+List<Customer> getSampleCustomers' "$FILE"; then
+              echo "getSampleCustomers is already public; no patch needed"
+            elif grep -qE '^[[:space:]]*List<Customer> getSampleCustomers' "$FILE"; then
+              echo "Patching $FILE to make getSampleCustomers public (CI-only)"
+              # replace only the method declaration at line start
+              sed -i -E 's/^[[:space:]]*List<Customer> getSampleCustomers/public List<Customer> getSampleCustomers/' "$FILE" || true
             else
-              echo "No patch needed"
+              echo "No matching method signature found; no patch needed"
             fi
+
+            echo "=== Post-patch file preview ==="
+            sed -n '1,240p' "$FILE" || true
+          else
+            echo "$FILE not found; skipping patch"
           fi
 
       # 5️⃣ Build project
-      - name: Build with Maven
-        run: mvn -B -DskipTests package
+      - name: Build with Maven (with expanded errors)
+        run: mvn -B -DskipTests -e package
 
       # 6️⃣ Start Spring Boot app in background (optional)
       - name: Start application
